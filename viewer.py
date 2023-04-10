@@ -15,3 +15,4 @@ if __name__ == "__main__":
                 break
     finally:
         pl.stop_pipeline(pipeline)
+        cv2.destroyAllWindows()
