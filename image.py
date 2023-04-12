@@ -1,16 +1,20 @@
 import numpy as np
 import cv2
+import pyrealsense2 as rs
 
 def get_images(pipeline):
-    frames = pipeline.wait_for_frames()
-    depth_frame = frames.get_depth_frame()
-    color_frame = frames.get_color_frame()
+    align_to = rs.stream.color
+    align = rs.align(align_to)
 
-    depth_image = np.asanyarray(depth_frame.get_data()) # uint16
-    color_image = np.asanyarray(color_frame.get_data()) # uint8
+    frames = pipeline.wait_for_frames()
+    aligned_frames = align.process(frames)
+
+    aligned_depth_frame = aligned_frames.get_depth_frame()
+    color_frame = aligned_frames.get_color_frame()
+
+    depth_image = np.asanyarray(aligned_depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
 
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
 
-    image_size = depth_colormap.shape
-
-    return [color_image, depth_colormap], image_size
+    return color_image, depth_colormap
